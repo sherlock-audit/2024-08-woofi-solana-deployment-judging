@@ -196,6 +196,19 @@ Consider adding a [constraint](https://github.com/sherlock-audit/2024-08-woofi-s
 Need investigation here.
 Same with https://github.com/sherlock-audit/2024-08-woofi-solana-deployment-judging/issues/40
 
+**toprince**
+
+should be Not valid.
+1. all pools' quote_token_mint is USDC after create pool
+2. constraint = woopool_quote.token_mint == woopool_from.quote_token_mint
+3. above constraint should make sure the quote pool is USDC 
+
+**sherlock-admin2**
+
+The protocol team fixed this issue in the following PRs/commits:
+https://github.com/woonetwork/WOOFi_Solana/pull/29
+
+
 # Issue M-1: An admin authority initializing RebateInfo will make claim_rebate_fee unusable 
 
 Source: https://github.com/sherlock-audit/2024-08-woofi-solana-deployment-judging/issues/13 
@@ -248,73 +261,7 @@ The protocol team fixed this issue in the following PRs/commits:
 https://github.com/woonetwork/WOOFi_Solana/pull/28
 
 
-# Issue M-2: Attacker can control rebate managers for supported tokens since there is only 1 rebate manager per quote token 
-
-Source: https://github.com/sherlock-audit/2024-08-woofi-solana-deployment-judging/issues/16 
-
-## Found by 
-LZ\_security, g, shaflow01, zigtur
-### Summary
-
-The rebate manager uses the following [seeds](https://github.com/sherlock-audit/2024-08-woofi-solana-deployment/blob/main/WOOFi_Solana/programs/rebate_manager/src/instructions/admin/create_rebate_manager.rs#L18-L21) on creation:
-- `REBATE_MANAGER_SEED`
-- `quote_token_mint`
-
-This means that only 1 rebate manager can be created per quote token. Any attacker can block rebate functionality by front-running the creation of rebate managers for all the supported tokens (e.g. USDC, USDT, SOL).
-
-### Root Cause
-
-In [`create_rebate_manager.rs:18-21`](https://github.com/sherlock-audit/2024-08-woofi-solana-deployment/blob/main/WOOFi_Solana/programs/rebate_manager/src/instructions/admin/create_rebate_manager.rs#L18-L21), the choice to allow only 1 rebate manager per quote token is a mistake. Attackers can front-run the creation of rebate managers for supported quote tokens so they control all rebate managers.
-
-### Internal pre-conditions
-
-None
-
-### External pre-conditions
-
-None
-
-### Attack Path
-
-1. Attacker front-runs any [`create_rebate_manager()`](https://github.com/sherlock-audit/2024-08-woofi-solana-deployment/blob/main/WOOFi_Solana/programs/rebate_manager/src/instructions/admin/create_rebate_manager.rs#L38-L46) calls with their own.
-
-### Impact
-
-Rebate functionality will be blocked for the quote tokens the attacker controls.
-
-### PoC
-
-_No response_
-
-### Mitigation
-
-Consider using the [`authority` ](https://github.com/sherlock-audit/2024-08-woofi-solana-deployment/blob/main/WOOFi_Solana/programs/rebate_manager/src/instructions/admin/create_rebate_manager.rs#L12) as part of the [seeds](https://github.com/sherlock-audit/2024-08-woofi-solana-deployment/blob/main/WOOFi_Solana/programs/rebate_manager/src/instructions/admin/create_rebate_manager.rs#L18-L21) when creating a rebate manager.
-
-
-
-## Discussion
-
-**toprince**
-
-Need investigate this further.
-
-**toprince**
-
-Any one can deploy a contract and gain owner authority.
-Like anyone can deploy a new coin called itself USDT...
-You can already create a rebate manager now. But we will not use that.
-So not see pre create is a issue...
-
-**zigtur**
-
-@toprince Let's say that the project supports USDC and SOL for a week. Then after a week, project wants to support USDT.
-Here the attack would be exploitable.
-
-Let's say project supports those 3 tokens at deployment. But then, in one month project may want to support another token. Here the attack would be exploitable.
-This design is highly "non-future proof" and the contest details lets think that project plan to support more in the future:
-> We manually add the supported token pairs into the swap. **The initial list is: SOL, USDT, USDC**. Any two of them can form a swap pair.
-
-# Issue M-3: Missing permission control in create_oracle and create_pool. 
+# Issue M-2: Missing permission control in create_oracle and create_pool. 
 
 Source: https://github.com/sherlock-audit/2024-08-woofi-solana-deployment-judging/issues/54 
 
@@ -444,7 +391,6 @@ Set the admin parameter in CreateWooracle to admin = wooconfig.authority.
 
 
 
-
 ## Discussion
 
 **toprince**
@@ -458,7 +404,7 @@ The protocol team fixed this issue in the following PRs/commits:
 https://github.com/woonetwork/WOOFi_Solana/pull/31
 
 
-# Issue M-4: State changes are overwritten during anchor serialization when two accounts are the same 
+# Issue M-3: State changes are overwritten during anchor serialization when two accounts are the same 
 
 Source: https://github.com/sherlock-audit/2024-08-woofi-solana-deployment-judging/issues/73 
 
