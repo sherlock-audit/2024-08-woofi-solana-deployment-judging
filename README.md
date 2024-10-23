@@ -125,6 +125,10 @@ The protocol team fixed this issue in the following PRs/commits:
 https://github.com/woonetwork/WOOFi_Solana/pull/32
 
 
+**gjaldon**
+
+The `rebate_manager`'s bump is now [stored](https://github.com/woonetwork/WOOFi_Solana/pull/32/files#diff-835001a48f67d091f4ab7636e1feb47b7f621f12a1c5f66bdd4efef8b0d3dfc4R46) in the account and [included](https://github.com/woonetwork/WOOFi_Solana/pull/32/files#diff-7ebe76b6551ceac0b9dd992a2ee9449c44705f210d3f9e49a9bee7c1cff6e25fR60) in its `seeds()`. The issue is fixed and transfers from the `rebate_manager` will succeed.
+
 # Issue H-2: Quote pools are expected to have same base token and quote token but this is not enforced in swaps 
 
 Source: https://github.com/sherlock-audit/2024-08-woofi-solana-deployment-judging/issues/64 
@@ -209,6 +213,10 @@ The protocol team fixed this issue in the following PRs/commits:
 https://github.com/woonetwork/WOOFi_Solana/pull/29
 
 
+**gjaldon**
+
+The added [constraints](https://github.com/woonetwork/WOOFi_Solana/pull/29/files#diff-b2faa3b30424b7ca6ca3fdb210ea63f3b6e7787f7fe755ba014db10209bf417bR81) to `swap()` fixes the issue.
+
 # Issue M-1: An admin authority initializing RebateInfo will make claim_rebate_fee unusable 
 
 Source: https://github.com/sherlock-audit/2024-08-woofi-solana-deployment-judging/issues/13 
@@ -260,6 +268,10 @@ Need further investigation.
 The protocol team fixed this issue in the following PRs/commits:
 https://github.com/woonetwork/WOOFi_Solana/pull/28
 
+
+**gjaldon**
+
+Issue is fixed. This [change](https://github.com/woonetwork/WOOFi_Solana/pull/28/files#diff-defd7d6e6d9d85128063bbd26a3ce2cd2121bb138184f216b9769b8ad8fd1c3bR27) fixes the issue by also allowing admin authorities to claim rebate fees.
 
 # Issue M-2: Missing permission control in create_oracle and create_pool. 
 
@@ -403,6 +415,10 @@ Impact 2 is not valid, please verify if it can swap with correct pool.
 The protocol team fixed this issue in the following PRs/commits:
 https://github.com/woonetwork/WOOFi_Solana/pull/31
 
+
+**gjaldon**
+
+Restricting the creation of [pools](https://github.com/woonetwork/WOOFi_Solana/pull/31/files#diff-4a04513fed43958934596c64f64a13e196d44dc2dee3640e247fbbe705f50edbR20) and [oracles](https://github.com/woonetwork/WOOFi_Solana/pull/31/files#diff-64d931f4580a06c939cef7bc97433c02ba53ed2782ed2a543efb4fcbe74d4e35R51) to only the WooConfig authority fixes the issue.
 
 # Issue M-3: State changes are overwritten during anchor serialization when two accounts are the same 
 
@@ -598,4 +614,15 @@ The `reserves` variable is a core state variable and it will be wrong because of
 The protocol team fixed this issue in the following PRs/commits:
 https://github.com/woonetwork/WOOFi_Solana/pull/33
 
+
+**gjaldon**
+
+Case `woopool_from == woopool_quote`:
+- This [change](https://github.com/woonetwork/WOOFi_Solana/pull/33/files#diff-b2faa3b30424b7ca6ca3fdb210ea63f3b6e7787f7fe755ba014db10209bf417bR163-R168) fixes the issue because only the `woopool_quote` is modified. The changes to the from_pool and the quote pool are applied to only the quote pool because they are the same.
+
+Case `woopool_to == woopool_quote`:
+- This [change](https://github.com/woonetwork/WOOFi_Solana/pull/33/files#diff-b2faa3b30424b7ca6ca3fdb210ea63f3b6e7787f7fe755ba014db10209bf417bR260-R265) fixes the issue because only `woopool_quote` is modified . The changes to the to_pool and the quote are applied to only the quote pool because they are the same.
+
+Case where all 3 pools are different:
+- The previous behavior was [retained](https://github.com/woonetwork/WOOFi_Solana/blob/e5ed8dd8c882ece9260f9c71f58e6d6d72b072bd/programs/woofi/src/instructions/swap.rs#L386-L391) since this case was unaffected by the issue.
 
